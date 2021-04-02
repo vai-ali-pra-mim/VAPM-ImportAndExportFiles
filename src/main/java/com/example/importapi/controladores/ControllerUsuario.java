@@ -32,8 +32,12 @@ public class ControllerUsuario {
     public ResponseEntity baixarArquivoGeral(@RequestBody Usuario usuarioAuth, HttpServletResponse response) throws IOException {
 
         if (usuarioAuth.getEmail().equals("admin@gmail.com") & usuarioAuth.getSenha().equals("admin")) {
+            File theDir = new File("src/main/resources/static/");
+            if (!theDir.exists()){
+                theDir.mkdirs();
+            }
+            
             FileWriter fileWriter = new FileWriter("src/main/resources/static/Usuarios.csv");
-
             String headers = "idUsuario;nomeCompleto;dataNascimento;cpf;" +
                     "rg;email;senha;telefone;cep;complemento;coordenadas;pontoReferencia;" +
                     "saldo;fotoRG;fotoPerfil\n";
@@ -68,8 +72,15 @@ public class ControllerUsuario {
             return ResponseEntity.badRequest().build();
 
         UsuarioVisao usuarioEncontrado = repository.findByEmailESenha(usuarioAuth.getEmail(), usuarioAuth.getSenha());
-        
+
         if (usuarioEncontrado != null) {
+
+            File theDir = new File("src/main/resources/static/");
+            if (!theDir.exists()){
+                theDir.mkdirs();
+            }
+
+
             String uniqueID = UUID.randomUUID().toString();
             String nomeArquivo = String.format("%s-%s-%s", uniqueID.substring(5,12), usuarioEncontrado.getNomeCompleto().substring(0, 10), LocalDate.now());
             String caminhoArquivo = String.format("src/main/resources/static/%s.csv", nomeArquivo);
