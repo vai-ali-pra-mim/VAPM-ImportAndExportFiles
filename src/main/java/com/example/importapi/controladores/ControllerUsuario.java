@@ -30,8 +30,10 @@ public class ControllerUsuario {
 
     @GetMapping("/download")
     public ResponseEntity baixarArquivoGeral(@RequestBody Usuario usuarioAuth, HttpServletResponse response) throws IOException {
+
         if (usuarioAuth.getEmail().equals("admin@gmail.com") & usuarioAuth.getSenha().equals("admin")) {
             FileWriter fileWriter = new FileWriter("src/main/resources/static/Usuarios.csv");
+
             String headers = "idUsuario;nomeCompleto;dataNascimento;cpf;" +
                     "rg;email;senha;telefone;cep;complemento;coordenadas;pontoReferencia;" +
                     "saldo;fotoRG;fotoPerfil\n";
@@ -52,6 +54,8 @@ public class ControllerUsuario {
             try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
                 FileCopyUtils.copy(inputStream, response.getOutputStream());
             }
+
+            file.delete();
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
@@ -60,7 +64,11 @@ public class ControllerUsuario {
 
     @GetMapping("/download/usuario")
     public ResponseEntity baixarArquivoUnicoUsuario(@RequestBody Usuario usuarioAuth, HttpServletResponse response) throws IOException {
+        if (usuarioAuth.getEmail().equals("") & usuarioAuth.getSenha().equals(""))
+            return ResponseEntity.badRequest().build();
+
         UsuarioVisao usuarioEncontrado = repository.findByEmailESenha(usuarioAuth.getEmail(), usuarioAuth.getSenha());
+        
         if (usuarioEncontrado != null) {
             String uniqueID = UUID.randomUUID().toString();
             String nomeArquivo = String.format("%s-%s-%s", uniqueID.substring(5,12), usuarioEncontrado.getNomeCompleto().substring(0, 10), LocalDate.now());
@@ -85,6 +93,8 @@ public class ControllerUsuario {
             try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
                 FileCopyUtils.copy(inputStream, response.getOutputStream());
             }
+            file.delete();
+
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
@@ -127,6 +137,8 @@ public class ControllerUsuario {
 
             repository.save(usuario);
         }
+
+
         return ResponseEntity.ok().build();
     }
 }
